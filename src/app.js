@@ -15,4 +15,14 @@ app.use(express.urlencoded({ extended: true, limit: "16kb" })) // limit the requ
 app.use(express.static("public")) // public folder is accessible to the public where we can store images or assets
 app.use(cookieParser()) // to parse the cookies from the request
 
+
+// routes import 
+import userRouter from './routes/user.routes.js'
+
+
+// routes declaration
+app.use("/api/v1/users", userRouter)
+
+
+
 export { app }
