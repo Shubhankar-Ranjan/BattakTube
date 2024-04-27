@@ -17,7 +17,7 @@ const registerUser = asyncHandler( async (req, res) => {
 
 
     const { fullName, email, username, password } = req.body
-    console.log("email: ", email);
+    // console.log("email: ", email);
 
     // checking if any of the fields are empty using the some() method
     if (
@@ -28,7 +28,7 @@ const registerUser = asyncHandler( async (req, res) => {
 
     // checking if user is already existed in the database using findOne() method
     // and using "$or" operator to check if either the username or email already exists 
-    const existedUser = User.findOne({
+    const existedUser = await User.findOne({
         $or: [{ username }, { email }]
     })
 
@@ -36,9 +36,19 @@ const registerUser = asyncHandler( async (req, res) => {
         throw new ApiError(409, "User with email or username already exists")
     }
 
+    // console.log(req.files);
+
     // Getting proper path uploaded by multer
     const avatarLocalPath = req.files?.avatar[0]?.path;
-    const coverImageLocalPath = req.files?.coverImage[0]?.path;
+
+    // const coverImageLocalPath = req.files?.coverImage[0]?.path;
+    // checking if coverImage file is uploaded then only we will get the path other wise it will be set to null
+    let coverImageLocalPath;
+    let coverImage;
+    if(req.files && Array.isArray(req.files.coverImage) && req.files.coverImage.length > 0){
+        coverImageLocalPath = req.files.coverImage[0].path
+        coverImage = await uploadOnCloudinary(coverImageLocalPath)
+    }
 
     // checking if avatar file is uploaded
     if(!avatarLocalPath){
@@ -47,7 +57,7 @@ const registerUser = asyncHandler( async (req, res) => {
 
     // upload them to cloudinary
     const avatar = await uploadOnCloudinary(avatarLocalPath)
-    const coverImage = await uploadOnCloudinary(coverImageLocalPath)
+    // const coverImage = await uploadOnCloudinary(coverImageLocalPath)
 
     if (!avatar){
         throw new ApiError(400, "Avatar file is required")
